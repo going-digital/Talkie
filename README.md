@@ -70,4 +70,4 @@ Thanks
 * Scene greets: LFT, Mahoney
 
 
-This library was developed using Arduino and Freemat.
+This library was developed using [Arduino](http://arduino.cc) and [Freemat](http://freemat.sourceforge.net).
