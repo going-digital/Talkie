@@ -29,38 +29,17 @@ See the examples. Any commented data lines in the examples can be un-commented a
 
 Word dictionaries
 -----------------
-* Vocab_UK_Acorn
-  16K bytes speech data
-  165 words related to home computing
-  Male UK English (voiced by BBC newsreader Kenneth Kendall)
-  Data originally part of Acorn Computers Speech Synthesiser
+* Vocab_UK_Acorn - a male UK english voice. 165 words related to home computing. 16K bytes in total. Data originally part of Acorn Computers Speech Synthesiser, and famously voiced by BBC's Kenneth Kendall.
 
-* Vocab_US_Clock
-  4K bytes speech data
-  35 words related to the time of day
-  Female US English
-  Data of unknown origin. ROM serial number VM71003A.
+* Vocab_US_Clock - a female US english voice. 35 words related to time of day. 4K bytes in total. Data of unknown origin from ROM serial number VM71003A.
 
-* Vocab_US_TI99
-  32K bytes speech data
-  360 words related to home computing
-  Male US English
-  Data originally part of Texas Instruments TI-99/4A Speech System
+* Vocab_US_TI99 - a deep male US english voice. 360 words related to home computing. 32K bytes in total. Data originally part of Texas Instruments TI-99/4A Speech System.
 
-* Vocab_US_Male
-  16K bytes speech data
-  206 words related to flight and engineering
-  Data of unknown origin. ROM serial number VM61002.
+* Vocab_US_Male - a male US english voice. 206 words related to aeronautics. 16K bytes in total. Data of unknown origin. ROM serial number VM61002.
 
-* Vocab_US_Male_Large:
-  48K bytes speech data
-  402 words and phrases related to flight and engineering
-  Data of unknown origin. ROM serial number VM61003/4/5.
+* Vocab_US_Male_Large - a male US english voice. 402 words related to aeronautics. 48K bytes speech data. Data of unknown origin. ROM serial number VM61003/4/5.
 
-* Demo_Toms_Diner:
-  24K bytes music data
-  Results from the work-in-progress Talkie compressor
-  Tom's Diner by Suzanne Vega [Amazon UK](http://www.amazon.co.uk/Solitude-Standing-Suzanne-Vega/dp/B000026GZQ) [Amazon US](http://www.amazon.com/Solitude-Standing-Suzanne-Vega/dp/B000002GHB) or look for 'Solitude Standing' on your preferred music store. (Only this album contains the original a capella version)
+* Demo_Toms_Diner - demo of the work-in-progress Talkie compressor. 24K bytes music data. Tom's Diner was written/recorded by Suzanne Vega [(Amazon UK)](http://www.amazon.co.uk/Solitude-Standing-Suzanne-Vega/dp/B000026GZQ) [(Amazon US)](http://www.amazon.com/Solitude-Standing-Suzanne-Vega/dp/B000002GHB) or look for 'Solitude Standing' on your preferred music store. (Only this album contains the original a capella version)
 
 
 The Audio output
