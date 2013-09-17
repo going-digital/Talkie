@@ -7,7 +7,7 @@ Quick start
 -----------
 [Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/Talkie/zipball/master) Install the "talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
 
-Note that currently, Talkie only on 168 or 328 based Arduinos at 16MHz only. Other devices may be supported in future releases, as I acquire them.
+Note that currently, Talkie only on 168 or 328 based Arduinos at 16MHz only. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
 
 Introduction
