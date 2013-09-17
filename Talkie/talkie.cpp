@@ -8,7 +8,7 @@
  #include <avr/io.h>
  #include "WProgram.h"
 #endif
-#include "Talkie.h"
+#include "talkie.h"
 
 #define FS 8000 // Speech engine sample rate
 
