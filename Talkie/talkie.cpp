@@ -30,6 +30,8 @@ int8_t tmsK8[0x08]      = {0xC0,0xD8,0xF0,0x07,0x1F,0x37,0x4F,0x66};
 int8_t tmsK9[0x08]      = {0xC0,0xD4,0xE8,0xFC,0x10,0x25,0x39,0x4D};
 int8_t tmsK10[0x08]     = {0xCD,0xDF,0xF1,0x04,0x16,0x20,0x3B,0x4D};
 
+float volumeMult = 1;	//Volume Multiplier to boost or shrink PWM strength. (1 = Normal volume)
+
 void Talkie::setPtr(uint8_t* addr) {
 	ptrAddr = addr;
 	ptrBit = 0;
@@ -143,6 +145,15 @@ void Talkie::say(uint8_t* addr) {
 	} while (energy != 0xf);
 }
 
+//Sets the volume in percentage
+//0=Mute, 100=Max(normal), 100+ = boosted
+//
+void Talkie::setVol(uint8_t volume) {
+	//Calculate the volume multiplier
+	volumeMult = volume*0.01;
+}
+
+
 #define CHIRP_SIZE 41
 int8_t chirp[CHIRP_SIZE] = {0x00,0x2a,0xd4,0x32,0xb2,0x12,0x25,0x14,0x02,0xe1,0xc5,0x02,0x5f,0x5a,0x05,0x0f,0x26,0xfc,0xa5,0xa5,0xd6,0xdd,0xdc,0xfc,0x25,0x2b,0x22,0x21,0x0f,0xff,0xf8,0xee,0xed,0xef,0xf7,0xf6,0xfa,0x00,0x03,0x02,0x01};
 
@@ -151,8 +162,11 @@ ISR(TIMER1_COMPA_vect) {
   static uint8_t periodCounter;
   static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10;
   int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
-
-  OCR2B = nextPwm;
+	
+  uint16_t pwmWithVol = (uint16_t)(nextPwm * volumeMult);  	//Apply volume multiplier to pwm signal
+  if (pwmWithVol > 255) { pwmWithVol = 255; }				//Clamp waveform at 255 max peak
+  OCR2B = (uint8_t) pwmWithVol;								//Set PWM register
+  
   sei();
   if (synthPeriod) {
     // Voiced source

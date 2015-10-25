@@ -13,6 +13,7 @@ class Talkie
 {
 	public:
 		void say(uint8_t* address);
+		void setVol(uint8_t volume); //Set volume by percentage
 		uint8_t* ptrAddr;
 		uint8_t ptrBit;
 	private:
