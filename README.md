@@ -65,7 +65,7 @@ Thanks
 ------
 * For motivation and encouragement: Linx Electronics Club, esp. Rob, Shaw, Steve
 * Thanks to the original Texas Instruments speech group: Larry Brantingham, Paul Breedlove, Richard Wiggins and Gene Frantz
-* Thanks to the emulator-heads for their extensive documentation and coefficient tables: Lord Midnight, Kevtris and all [MAME](http://mamedev.org) and [MESS](http://www.mess.org) contributors
+* Thanks to the emulator-heads for their extensive documentation and coefficient tables: Lord Nightmare, Kevtris and all [MAME](http://mamedev.org) and [MESS](http://www.mess.org) contributors
 * Thanks to the authors of low bandwidth open source speech codecs for their inspirational source code: [Asterisk](http://www.asterisk.org), [Codec2](http://codec2.org), [Hawkvoice](http://hawksoft.com/hawkvoice), [Speex](http://www.speex.org)
 * Scene greets: [LFT](http://www.linusakesson.net), [Mahoney](http://www.livet.se/mahoney)
 
