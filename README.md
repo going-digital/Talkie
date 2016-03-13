@@ -9,7 +9,7 @@ Quick start
 
 Connect headphones or an audio amplifier to digital pin 3 on Arduino, or the DAC pin on Teensy.
 
-Note that currently, Talkie only on 168 or 328 based Arduinos at 16MHz, and Teensy LC, 3.1 & 3.2. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
+Note that currently, Talkie works only on 168 or 328 based Arduinos at 16MHz, and Teensy LC, 3.1 & 3.2. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
 
 Introduction
