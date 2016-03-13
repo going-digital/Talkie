@@ -12,6 +12,7 @@
 
 #define FS 8000 // Speech engine sample rate
 
+static void timerInterrupt();
 static uint8_t synthPeriod;
 static uint16_t synthEnergy;
 static int16_t synthK1,synthK2;
@@ -70,7 +71,10 @@ void Talkie::say(const uint8_t * addr) {
 		// Auto-setup.
 		// 
 		// Enable the speech system whenever say() is called.
-		
+#if defined(__AVR__)
+#if F_CPU != 16000000L
+#error "F_CPU must be 16 MHz"
+#endif
 		pinMode(3,OUTPUT);
 		// Timer 2 set up as a 62500Hz PWM.
 		//
@@ -90,7 +94,11 @@ void Talkie::say(const uint8_t * addr) {
 		TCNT1 = 0;
 		OCR1A = F_CPU / FS;
 		TIMSK1 = _BV(OCIE1A);
-
+#elif defined(__arm__) && defined(CORE_TEENSY)
+#define ISR(f) void f(void)
+		IntervalTimer *t = new IntervalTimer();
+		t->begin(timerInterrupt, 1000000.0f / (float)FS);
+#endif
 		setup = 1;
 	}
 
@@ -147,13 +155,25 @@ void Talkie::say(const uint8_t * addr) {
 static uint8_t chirp[CHIRP_SIZE] = {0x00,0x2a,0xd4,0x32,0xb2,0x12,0x25,0x14,0x02,0xe1,0xc5,0x02,0x5f,0x5a,0x05,0x0f,0x26,0xfc,0xa5,0xa5,0xd6,0xdd,0xdc,0xfc,0x25,0x2b,0x22,0x21,0x0f,0xff,0xf8,0xee,0xed,0xef,0xf7,0xf6,0xfa,0x00,0x03,0x02,0x01};
 
 ISR(TIMER1_COMPA_vect) {
+  timerInterrupt();
+}
+
+static void timerInterrupt() {
   static uint8_t nextPwm;
   static uint8_t periodCounter;
   static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9;
   int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
 
+#if defined(__AVR__)
   OCR2B = nextPwm;
   sei();
+#elif defined(__arm__) && defined(CORE_TEENSY)
+#if defined(__MKL26Z64__)
+  analogWrite(A12, nextPwm);
+#else
+  analogWrite(A14, nextPwm);
+#endif
+#endif
   if (synthPeriod) {
     // Voiced source
     if (periodCounter < synthPeriod) {
