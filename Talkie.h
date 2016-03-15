@@ -7,21 +7,22 @@
 
 #include <inttypes.h>
 
-
 class Talkie
 {
-	public:
-		void say(const uint8_t * address);
-		const uint8_t * ptrAddr;
-		uint8_t ptrBit;
-	private:
-		// Setup
-		uint8_t setup;
-		
-		// Bitstream parser
-		void setPtr(const uint8_t * addr);
-		uint8_t rev(uint8_t a);
-		uint8_t getBits(uint8_t bits);
+public:
+	void say(const uint8_t * address);
+	uint8_t sayReady(const uint8_t * address);
+	uint8_t sayGo();
+	const uint8_t * ptrAddr;
+	uint8_t ptrBit;
+private:
+	// Setup
+	uint8_t setup;
+	
+	// Bitstream parser
+	void setPtr(const uint8_t * addr);
+	uint8_t rev(uint8_t a);
+	uint8_t getBits(uint8_t bits);
 };
 
 

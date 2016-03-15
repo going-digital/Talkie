@@ -3,10 +3,10 @@
 // This code is released under GPLv2 license.
 
 #if (ARDUINO >= 100)
- #include "Arduino.h"
+#include "Arduino.h"
 #else
- #include <avr/io.h>
- #include "WProgram.h"
+#include <avr/io.h>
+#include "WProgram.h"
 #endif
 #include "Talkie.h"
 
@@ -84,7 +84,7 @@ void Talkie::say(const uint8_t * addr) {
 		TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
 		TCCR2B = _BV(CS20);
 		TIMSK2 = 0;
-	
+		
 		// Unfortunately we can't calculate the next sample every PWM cycle
 		// as the routine is too slow. So use Timer 1 to trigger that.
 		
@@ -155,70 +155,160 @@ void Talkie::say(const uint8_t * addr) {
 static uint8_t chirp[CHIRP_SIZE] = {0x00,0x2a,0xd4,0x32,0xb2,0x12,0x25,0x14,0x02,0xe1,0xc5,0x02,0x5f,0x5a,0x05,0x0f,0x26,0xfc,0xa5,0xa5,0xd6,0xdd,0xdc,0xfc,0x25,0x2b,0x22,0x21,0x0f,0xff,0xf8,0xee,0xed,0xef,0xf7,0xf6,0xfa,0x00,0x03,0x02,0x01};
 
 ISR(TIMER1_COMPA_vect) {
-  timerInterrupt();
+	timerInterrupt();
 }
 
 static void timerInterrupt() {
-  static uint8_t nextPwm;
-  static uint8_t periodCounter;
-  static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9;
-  int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
+	static uint8_t nextPwm;
+	static uint8_t periodCounter;
+	static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9;
+	int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
 
 #if defined(__AVR__)
-  OCR2B = nextPwm;
-  sei();
+	OCR2B = nextPwm;
+	sei();
 #elif defined(__arm__) && defined(CORE_TEENSY)
 #if defined(__MKL26Z64__)
-  analogWrite(A12, nextPwm);
+	analogWrite(A12, nextPwm);
 #else
-  analogWrite(A14, nextPwm);
+	analogWrite(A14, nextPwm);
 #endif
 #endif
-  if (synthPeriod) {
-    // Voiced source
-    if (periodCounter < synthPeriod) {
-      periodCounter++;
-    } else {
-      periodCounter = 0;
-    }
-    if (periodCounter < CHIRP_SIZE) {
-      u10 = ((chirp[periodCounter]) * (uint32_t) synthEnergy) >> 8;
-    } else {
-      u10 = 0;
-    }
-  } else {
-    // Unvoiced source
-    static uint16_t synthRand = 1;
-    synthRand = (synthRand >> 1) ^ ((synthRand & 1) ? 0xB800 : 0);
-    u10 = (synthRand & 1) ? synthEnergy : -synthEnergy;
-  }
-  // Lattice filter forward path
-  u9 = u10 - (((int16_t)synthK10*x9) >> 7);
-  u8 = u9 - (((int16_t)synthK9*x8) >> 7);
-  u7 = u8 - (((int16_t)synthK8*x7) >> 7);
-  u6 = u7 - (((int16_t)synthK7*x6) >> 7);
-  u5 = u6 - (((int16_t)synthK6*x5) >> 7);
-  u4 = u5 - (((int16_t)synthK5*x4) >> 7);
-  u3 = u4 - (((int16_t)synthK4*x3) >> 7);
-  u2 = u3 - (((int16_t)synthK3*x2) >> 7);
-  u1 = u2 - (((int32_t)synthK2*x1) >> 15);
-  u0 = u1 - (((int32_t)synthK1*x0) >> 15);
+	if (synthPeriod) {
+		// Voiced source
+		if (periodCounter < synthPeriod) {
+			periodCounter++;
+		} else {
+			periodCounter = 0;
+		}
+		if (periodCounter < CHIRP_SIZE) {
+			u10 = ((chirp[periodCounter]) * (uint32_t) synthEnergy) >> 8;
+		} else {
+			u10 = 0;
+		}
+	} else {
+		// Unvoiced source
+		static uint16_t synthRand = 1;
+		synthRand = (synthRand >> 1) ^ ((synthRand & 1) ? 0xB800 : 0);
+		u10 = (synthRand & 1) ? synthEnergy : -synthEnergy;
+	}
+	// Lattice filter forward path
+	u9 = u10 - (((int16_t)synthK10*x9) >> 7);
+	u8 = u9 - (((int16_t)synthK9*x8) >> 7);
+	u7 = u8 - (((int16_t)synthK8*x7) >> 7);
+	u6 = u7 - (((int16_t)synthK7*x6) >> 7);
+	u5 = u6 - (((int16_t)synthK6*x5) >> 7);
+	u4 = u5 - (((int16_t)synthK5*x4) >> 7);
+	u3 = u4 - (((int16_t)synthK4*x3) >> 7);
+	u2 = u3 - (((int16_t)synthK3*x2) >> 7);
+	u1 = u2 - (((int32_t)synthK2*x1) >> 15);
+	u0 = u1 - (((int32_t)synthK1*x0) >> 15);
 
-  // Output clamp
-  if (u0 > 511) u0 = 511;
-  if (u0 < -512) u0 = -512;
-  
-  // Lattice filter reverse path
-  x9 = x8 + (((int16_t)synthK9*u8) >> 7);
-  x8 = x7 + (((int16_t)synthK8*u7) >> 7);
-  x7 = x6 + (((int16_t)synthK7*u6) >> 7);
-  x6 = x5 + (((int16_t)synthK6*u5) >> 7);
-  x5 = x4 + (((int16_t)synthK5*u4) >> 7);
-  x4 = x3 + (((int16_t)synthK4*u3) >> 7);
-  x3 = x2 + (((int16_t)synthK3*u2) >> 7);
-  x2 = x1 + (((int32_t)synthK2*u1) >> 15);
-  x1 = x0 + (((int32_t)synthK1*u0) >> 15);
-  x0 = u0;
+	// Output clamp
+	if (u0 > 511) u0 = 511;
+	if (u0 < -512) u0 = -512;
 
-  nextPwm = (u0>>2)+0x80;
+	// Lattice filter reverse path
+	x9 = x8 + (((int16_t)synthK9*u8) >> 7);
+	x8 = x7 + (((int16_t)synthK8*u7) >> 7);
+	x7 = x6 + (((int16_t)synthK7*u6) >> 7);
+	x6 = x5 + (((int16_t)synthK6*u5) >> 7);
+	x5 = x4 + (((int16_t)synthK5*u4) >> 7);
+	x4 = x3 + (((int16_t)synthK4*u3) >> 7);
+	x3 = x2 + (((int16_t)synthK3*u2) >> 7);
+	x2 = x1 + (((int32_t)synthK2*u1) >> 15);
+	x1 = x0 + (((int32_t)synthK1*u0) >> 15);
+	x0 = u0;
+
+	nextPwm = (u0>>2)+0x80;
 }
+
+uint8_t Talkie::sayReady(const uint8_t * addr) {
+
+	if (!setup) {
+		// Auto-setup.
+		// 
+		// Enable the speech system whenever say() is called.
+#if defined(__AVR__)
+#if F_CPU != 16000000L
+#error "F_CPU must be 16 MHz"
+#endif
+		pinMode(3,OUTPUT);
+		// Timer 2 set up as a 62500Hz PWM.
+		//
+		// The PWM 'buzz' is well above human hearing range and is
+		// very easy to filter out.
+		//
+		TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+		TCCR2B = _BV(CS20);
+		TIMSK2 = 0;
+		
+		// Unfortunately we can't calculate the next sample every PWM cycle
+		// as the routine is too slow. So use Timer 1 to trigger that.
+		
+		// Timer 1 set up as a 8000Hz sample interrupt
+		TCCR1A = 0;
+		TCCR1B = _BV(WGM12) | _BV(CS10);
+		TCNT1 = 0;
+		OCR1A = F_CPU / FS;
+		TIMSK1 = _BV(OCIE1A);
+#elif defined(__arm__) && defined(CORE_TEENSY)
+#define ISR(f) void f(void)
+		IntervalTimer *t = new IntervalTimer();
+		t->begin(timerInterrupt, 1000000.0f / (float)FS);
+#endif
+		setup = 1;
+	}
+	setPtr(addr);
+	return 1;
+
+}
+uint8_t Talkie::sayGo() {
+	uint8_t energy;
+	if ( !ptrAddr ) return 0xf;
+	energy = getBits(4);
+	uint8_t repeat;
+	// Read speech data, processing the variable size frames.
+	if (energy == 0) {
+		// Energy = 0: rest frame
+		synthEnergy = 0;
+	} else if (energy == 0xf) {
+		// Energy = 15: stop frame. Silence the synthesiser.
+		synthEnergy = 0;
+		synthK1 = 0;
+		synthK2 = 0;
+		synthK3 = 0;
+		synthK4 = 0;
+		synthK5 = 0;
+		synthK6 = 0;
+		synthK7 = 0;
+		synthK8 = 0;
+		synthK9 = 0;
+		synthK10 = 0;
+		setPtr(0);
+	} else {
+		synthEnergy = tmsEnergy[energy];
+		repeat = getBits(1);
+		synthPeriod = tmsPeriod[getBits(6)];
+		// A repeat frame uses the last coefficients
+		if (!repeat) {
+			// All frames use the first 4 coefficients
+			synthK1 = tmsK1[getBits(5)];
+			synthK2 = tmsK2[getBits(5)];
+			synthK3 = tmsK3[getBits(4)];
+			synthK4 = tmsK4[getBits(4)];
+			if (synthPeriod) {
+				// Voiced frames use 6 extra coefficients.
+				synthK5 = tmsK5[getBits(4)];
+				synthK6 = tmsK6[getBits(4)];
+				synthK7 = tmsK7[getBits(4)];
+				synthK8 = tmsK8[getBits(3)];
+				synthK9 = tmsK9[getBits(3)];
+				synthK10 = tmsK10[getBits(3)];
+			}
+		}
+	}
+	return energy;
+} 
+
+
