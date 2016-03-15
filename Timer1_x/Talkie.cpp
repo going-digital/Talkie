@@ -18,13 +18,6 @@ static uint16_t synthEnergy;
 static int16_t synthK1,synthK2;
 static int8_t synthK3,synthK4,synthK5,synthK6,synthK7,synthK8,synthK9,synthK10;
 
-static void sayisr();
-static Talkie *isrTalkptr;
-static uint8_t nextData=0;
-
-
-
-
 static const uint8_t tmsEnergy[0x10] = {0x00,0x02,0x03,0x04,0x05,0x07,0x0a,0x0f,0x14,0x20,0x29,0x39,0x51,0x72,0xa1,0xff};
 static const uint8_t tmsPeriod[0x40] = {0x00,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2A,0x2B,0x2D,0x2F,0x31,0x33,0x35,0x36,0x39,0x3B,0x3D,0x3F,0x42,0x45,0x47,0x49,0x4D,0x4F,0x51,0x55,0x57,0x5C,0x5F,0x63,0x66,0x6A,0x6E,0x73,0x77,0x7B,0x80,0x85,0x8A,0x8F,0x95,0x9A,0xA0};
 static const uint16_t tmsK1[0x20]     = {0x82C0,0x8380,0x83C0,0x8440,0x84C0,0x8540,0x8600,0x8780,0x8880,0x8980,0x8AC0,0x8C00,0x8D40,0x8F00,0x90C0,0x92C0,0x9900,0xA140,0xAB80,0xB840,0xC740,0xD8C0,0xEBC0,0x0000,0x1440,0x2740,0x38C0,0x47C0,0x5480,0x5EC0,0x6700,0x6D40};
@@ -72,6 +65,7 @@ uint8_t Talkie::getBits(uint8_t bits) {
 	return value;
 }
 void Talkie::say(const uint8_t * addr) {
+	uint8_t energy;
 
 	if (!setup) {
 		// Auto-setup.
@@ -100,20 +94,61 @@ void Talkie::say(const uint8_t * addr) {
 		TCNT1 = 0;
 		OCR1A = F_CPU / FS;
 		TIMSK1 = _BV(OCIE1A);
-#define ISR_RATIO (25000/ (F_CPU / FS) )
 #elif defined(__arm__) && defined(CORE_TEENSY)
 #define ISR(f) void f(void)
 		IntervalTimer *t = new IntervalTimer();
 		t->begin(timerInterrupt, 1000000.0f / (float)FS);
-#define ISR_RATIO (25000/ (1000000.0f / (float)FS) )
 #endif
-		isrTalkptr = this;
 		setup = 1;
 	}
+
 	setPtr(addr);
-	active=true;
-	nextData=0;
-	sayisr();	// Get first data now
+	do {
+		uint8_t repeat;
+
+		// Read speech data, processing the variable size frames.
+		
+		energy = getBits(4);
+		if (energy == 0) {
+			// Energy = 0: rest frame
+			synthEnergy = 0;
+		} else if (energy == 0xf) {
+			// Energy = 15: stop frame. Silence the synthesiser.
+			synthEnergy = 0;
+			synthK1 = 0;
+			synthK2 = 0;
+			synthK3 = 0;
+			synthK4 = 0;
+			synthK5 = 0;
+			synthK6 = 0;
+			synthK7 = 0;
+			synthK8 = 0;
+			synthK9 = 0;
+			synthK10 = 0;
+		} else {
+			synthEnergy = tmsEnergy[energy];
+			repeat = getBits(1);
+			synthPeriod = tmsPeriod[getBits(6)];
+			// A repeat frame uses the last coefficients
+			if (!repeat) {
+				// All frames use the first 4 coefficients
+				synthK1 = tmsK1[getBits(5)];
+				synthK2 = tmsK2[getBits(5)];
+				synthK3 = tmsK3[getBits(4)];
+				synthK4 = tmsK4[getBits(4)];
+				if (synthPeriod) {
+					// Voiced frames use 6 extra coefficients.
+					synthK5 = tmsK5[getBits(4)];
+					synthK6 = tmsK6[getBits(4)];
+					synthK7 = tmsK7[getBits(4)];
+					synthK8 = tmsK8[getBits(3)];
+					synthK9 = tmsK9[getBits(3)];
+					synthK10 = tmsK10[getBits(3)];
+				}
+			}
+		}
+		delay(25);
+	} while (energy != 0xf);
 }
 
 #define CHIRP_SIZE 41
@@ -127,7 +162,6 @@ static void timerInterrupt() {
 	static uint8_t nextPwm;
 	static uint8_t periodCounter;
 	static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9;
-
 	int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
 
 #if defined(__AVR__)
@@ -187,17 +221,52 @@ static void timerInterrupt() {
 	x0 = u0;
 
 	nextPwm = (u0>>2)+0x80;
-	nextData++;
-	if (ISR_RATIO <= nextData) { nextData=0; sayisr(); }
 }
 
+uint8_t Talkie::sayReady(const uint8_t * addr) {
 
-static void sayisr() {
+	if (!setup) {
+		// Auto-setup.
+		// 
+		// Enable the speech system whenever say() is called.
+#if defined(__AVR__)
+#if F_CPU != 16000000L
+#error "F_CPU must be 16 MHz"
+#endif
+		pinMode(3,OUTPUT);
+		// Timer 2 set up as a 62500Hz PWM.
+		//
+		// The PWM 'buzz' is well above human hearing range and is
+		// very easy to filter out.
+		//
+		TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+		TCCR2B = _BV(CS20);
+		TIMSK2 = 0;
+		
+		// Unfortunately we can't calculate the next sample every PWM cycle
+		// as the routine is too slow. So use Timer 1 to trigger that.
+		
+		// Timer 1 set up as a 8000Hz sample interrupt
+		TCCR1A = 0;
+		TCCR1B = _BV(WGM12) | _BV(CS10);
+		TCNT1 = 0;
+		OCR1A = F_CPU / FS;
+		TIMSK1 = _BV(OCIE1A);
+#elif defined(__arm__) && defined(CORE_TEENSY)
+#define ISR(f) void f(void)
+		IntervalTimer *t = new IntervalTimer();
+		t->begin(timerInterrupt, 1000000.0f / (float)FS);
+#endif
+		setup = 1;
+	}
+	setPtr(addr);
+	return 1;
+
+}
+uint8_t Talkie::sayGo() {
 	uint8_t energy;
-	Talkie *o = isrTalkptr;
-
-	if ( !(o->ptrAddr) ) return;
-	energy = o->getBits(4);
+	if ( !ptrAddr ) return 0xf;
+	energy = getBits(4);
 	uint8_t repeat;
 	// Read speech data, processing the variable size frames.
 	if (energy == 0) {
@@ -216,30 +285,30 @@ static void sayisr() {
 		synthK8 = 0;
 		synthK9 = 0;
 		synthK10 = 0;
-		o->setPtr(0);
-		o->active=false;
+		setPtr(0);
 	} else {
 		synthEnergy = tmsEnergy[energy];
-		repeat = o->getBits(1);
-		synthPeriod = tmsPeriod[o->getBits(6)];
+		repeat = getBits(1);
+		synthPeriod = tmsPeriod[getBits(6)];
 		// A repeat frame uses the last coefficients
 		if (!repeat) {
 			// All frames use the first 4 coefficients
-			synthK1 = tmsK1[o->getBits(5)];
-			synthK2 = tmsK2[o->getBits(5)];
-			synthK3 = tmsK3[o->getBits(4)];
-			synthK4 = tmsK4[o->getBits(4)];
+			synthK1 = tmsK1[getBits(5)];
+			synthK2 = tmsK2[getBits(5)];
+			synthK3 = tmsK3[getBits(4)];
+			synthK4 = tmsK4[getBits(4)];
 			if (synthPeriod) {
 				// Voiced frames use 6 extra coefficients.
-				synthK5 = tmsK5[o->getBits(4)];
-				synthK6 = tmsK6[o->getBits(4)];
-				synthK7 = tmsK7[o->getBits(4)];
-				synthK8 = tmsK8[o->getBits(3)];
-				synthK9 = tmsK9[o->getBits(3)];
-				synthK10 = tmsK10[o->getBits(3)];
+				synthK5 = tmsK5[getBits(4)];
+				synthK6 = tmsK6[getBits(4)];
+				synthK7 = tmsK7[getBits(4)];
+				synthK8 = tmsK8[getBits(3)];
+				synthK9 = tmsK9[getBits(3)];
+				synthK10 = tmsK10[getBits(3)];
 			}
 		}
 	}
+	return energy;
 } 
 
 
