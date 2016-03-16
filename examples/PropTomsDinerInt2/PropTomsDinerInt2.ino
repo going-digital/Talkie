@@ -30,7 +30,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(5, OUTPUT);
   digitalWrite(5, 1);//Enable Amplified.
-  voice.say(spDINER);
+  voice.sayQ(spDINER);
 }
 void loop() {
   delay( 250 );
@@ -45,7 +45,7 @@ void loop() {
     Serial.println(" Done! ");
     delay( 5000 ) ;
     Serial.println(" Play it again !!!!");
-    voice.say(spDINER);
+    voice.sayQ(spDINER);
   }
 }
 

@@ -75,8 +75,52 @@ uint8_t Talkie::getBits(uint8_t bits) {
 	}
 	return value;
 }
+
 void Talkie::say(const uint8_t * addr) {
 
+	if (!setup) {
+		// Auto-setup.
+		// 
+		// Enable the speech system whenever say() is called.
+#if defined(__AVR__)
+#if F_CPU != 16000000L
+#error "F_CPU must be 16 MHz"
+#endif
+		pinMode(3,OUTPUT);
+		// Timer 2 set up as a 62500Hz PWM.
+		//
+		// The PWM 'buzz' is well above human hearing range and is
+		// very easy to filter out.
+		//
+		TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+		TCCR2B = _BV(CS20);
+		TIMSK2 = 0;
+	
+		// Unfortunately we can't calculate the next sample every PWM cycle
+		// as the routine is too slow. So use Timer 1 to trigger that.
+		
+		// Timer 1 set up as a 8000Hz sample interrupt
+		TCCR1A = 0;
+		TCCR1B = _BV(WGM12) | _BV(CS10);
+		TCNT1 = 0;
+		OCR1A = F_CPU / FS;
+		TIMSK1 = _BV(OCIE1A);
+#elif defined(__arm__) && defined(CORE_TEENSY)
+#define ISR(f) void f(void)
+		IntervalTimer *t = new IntervalTimer();
+		t->begin(timerInterrupt, 1000000.0f / (float)FS);
+#endif
+		isrTalkptr = this;
+		setup = 1;
+	}
+
+	setPtr(addr);
+	nextData=0;
+	sayisr();	// Get first data now
+	while ( active() );
+}
+
+int8_t Talkie::sayQ(const uint8_t * addr) {
 	if (!setup) {
 		// Auto-setup.
 		// 
@@ -117,6 +161,7 @@ void Talkie::say(const uint8_t * addr) {
 	setPtr(addr);
 	nextData=0;
 	sayisr();	// Get first data now
+	return(0);	// return value is zer0 - TODO : implement queue and return free count after adding
 }
 
 #define CHIRP_SIZE 41

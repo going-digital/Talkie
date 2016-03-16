@@ -69,7 +69,10 @@ void loop() {
     busyloops = 0;
     Serial.print("currKM  ");
     Serial.println(currKM);
-    voice.say(spSpeak[currKM]);
+    if ( currKM % 2 )
+      voice.say(spSpeak[currKM]);
+    else
+      voice.sayQ(spSpeak[currKM]);
     lastKM = currKM;
   }
   busyloops++;

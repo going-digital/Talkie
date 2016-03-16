@@ -11,7 +11,7 @@ class Talkie
 {
 public:
 	void say(const uint8_t * address);
-	uint8_t sayQ(const uint8_t * address);
+	int8_t sayQ(const uint8_t * address);
 	const uint8_t * ptrAddr;
 	uint8_t ptrBit;
 	bool active( void );

@@ -41,7 +41,10 @@ void loop() {
 
   if ( !voice.active() ) {
     if (iidx < SP_MAX ) {
-      voice.say(spSpeak[iidx]);
+      if ( iidx % 2 )
+        voice.sayQ(spSpeak[iidx]);
+      else
+        voice.say(spSpeak[iidx]);
       Serial.print(">>");
       Serial.print("busyloops  ");
       Serial.println(busyloops);
@@ -51,7 +54,7 @@ void loop() {
 
       iidx++;
     }
-    // else iidx = 0;  // Repeat the Danger Warning over ... Repeat
+    else iidx = 0;  // Repeat the Danger Warning over ... Repeat
   }
   else busyloops++;
 }
