@@ -28,6 +28,7 @@ const uint8_t *spSpeak[] = {spDANGER, spDANGER, spRED, spALERT, spMOTOR, spIS, s
 uint8_t iidx = 0;
 
 void setup() {
+  Serial.begin(9600);
   pinMode(5, OUTPUT);
   digitalWrite(5, 1);//Enable Amplified.
   while (!Serial && 5000 > millis());
@@ -38,7 +39,7 @@ void setup() {
 uint32_t  busyloops = 0;
 void loop() {
 
-  if ( !voice.active ) {
+  if ( !voice.active() ) {
     if (iidx < SP_MAX ) {
       voice.say(spSpeak[iidx]);
       Serial.print(">>");
@@ -50,7 +51,7 @@ void loop() {
 
       iidx++;
     }
-    else iidx = 0;  // Repeat the Danger Warning over ... Repeat
+    // else iidx = 0;  // Repeat the Danger Warning over ... Repeat
   }
   else busyloops++;
 }

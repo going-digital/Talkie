@@ -11,9 +11,10 @@ class Talkie
 {
 public:
 	void say(const uint8_t * address);
+	uint8_t sayQ(const uint8_t * address);
 	const uint8_t * ptrAddr;
 	uint8_t ptrBit;
-	bool active;
+	bool active( void );
 	uint8_t getBits(uint8_t bits);
 	void setPtr(const uint8_t * addr);
 private:

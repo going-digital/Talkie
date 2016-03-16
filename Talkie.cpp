@@ -42,6 +42,10 @@ void Talkie::setPtr(const uint8_t * addr) {
 	ptrAddr = addr;
 	ptrBit = 0;
 }
+bool Talkie::active() {
+	yield();
+	return( 0 != ptrAddr );
+}
 
 // The ROMs used with the TI speech were serial, not byte wide.
 // Here's a handy routine to flip ROM data which is usually reversed.
@@ -111,7 +115,6 @@ void Talkie::say(const uint8_t * addr) {
 		setup = 1;
 	}
 	setPtr(addr);
-	active=true;
 	nextData=0;
 	sayisr();	// Get first data now
 }
@@ -217,7 +220,6 @@ static void sayisr() {
 		synthK9 = 0;
 		synthK10 = 0;
 		o->setPtr(0);
-		o->active=false;
 	} else {
 		synthEnergy = tmsEnergy[energy];
 		repeat = o->getBits(1);
