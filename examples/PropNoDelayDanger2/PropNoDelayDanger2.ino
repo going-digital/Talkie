@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 // Talkie library
 // Copyright 2011 Peter Knight
 // This code is released under GPLv2 license.
@@ -33,7 +35,7 @@ void setup() {
   digitalWrite(5, 1);//Enable Amplified.
   while (!Serial && 5000 > millis());
   Serial.println("Setting up");
-  analogReference(INTERNAL);  // drop volume level
+  //analogReference(INTERNAL);  // drop volume level
 }
 
 uint32_t  busyloops = 0;

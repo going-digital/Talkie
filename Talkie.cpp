@@ -38,9 +38,11 @@ static const uint8_t tmsK8[0x08]      = {0xC0,0xD8,0xF0,0x07,0x1F,0x37,0x4F,0x66
 static const uint8_t tmsK9[0x08]      = {0xC0,0xD4,0xE8,0xFC,0x10,0x25,0x39,0x4D};
 static const uint8_t tmsK10[0x08]     = {0xCD,0xDF,0xF1,0x04,0x16,0x20,0x3B,0x4D};
 
-void Talkie::setPtr(const uint8_t * addr) {
+bool Talkie::setPtr(const uint8_t * addr) {
 	ptrAddr = addr;
 	ptrBit = 0;
+	if ( addr ) return(true);
+	else return(false);
 }
 bool Talkie::active() {
 	yield();
@@ -77,47 +79,29 @@ uint8_t Talkie::getBits(uint8_t bits) {
 }
 
 void Talkie::say(const uint8_t * addr) {
-
-	if (!setup) {
-		// Auto-setup.
-		// 
-		// Enable the speech system whenever say() is called.
-#if defined(__AVR__)
-#if F_CPU != 16000000L
-#error "F_CPU must be 16 MHz"
-#endif
-		pinMode(3,OUTPUT);
-		// Timer 2 set up as a 62500Hz PWM.
-		//
-		// The PWM 'buzz' is well above human hearing range and is
-		// very easy to filter out.
-		//
-		TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-		TCCR2B = _BV(CS20);
-		TIMSK2 = 0;
-	
-		// Unfortunately we can't calculate the next sample every PWM cycle
-		// as the routine is too slow. So use Timer 1 to trigger that.
-		
-		// Timer 1 set up as a 8000Hz sample interrupt
-		TCCR1A = 0;
-		TCCR1B = _BV(WGM12) | _BV(CS10);
-		TCNT1 = 0;
-		OCR1A = F_CPU / FS;
-		TIMSK1 = _BV(OCIE1A);
-#elif defined(__arm__) && defined(CORE_TEENSY)
-#define ISR(f) void f(void)
-		IntervalTimer *t = new IntervalTimer();
-		t->begin(timerInterrupt, 1000000.0f / (float)FS);
-#endif
-		isrTalkptr = this;
-		setup = 1;
-	}
-
-	setPtr(addr);
-	nextData=0;
-	sayisr();	// Get first data now
+	sayQ( addr );
 	while ( active() );
+}
+// ADD: addr
+bool Talkie::say_add( const uint8_t *addr ) {
+	if ( addr && free ) {
+		free--;
+		say_buffer[head] = addr;
+		if (++head >= SAY_BUFFER_SIZE) head = 0;
+		return true;
+	}
+	return false;	// Do not add on ZERO addr or ZERO free queue
+}
+
+// REMOVE: addr
+const uint8_t * Talkie::say_remove() {
+	const uint8_t *addr = 0;	// Return 0 on empty
+	if ( free < SAY_BUFFER_SIZE ) {
+		free++;
+		addr = say_buffer[tail];
+		if (++tail >= SAY_BUFFER_SIZE) tail = 0;
+	}
+	return addr;
 }
 
 int8_t Talkie::sayQ(const uint8_t * addr) {
@@ -156,12 +140,25 @@ int8_t Talkie::sayQ(const uint8_t * addr) {
 #define ISR_RATIO (25000/ (1000000.0f / (float)FS) )
 #endif
 		isrTalkptr = this;
+		head = 0;
+		tail = 0;
+		free = SAY_BUFFER_SIZE;
+
 		setup = 1;
 	}
-	setPtr(addr);
-	nextData=0;
-	sayisr();	// Get first data now
-	return(0);	// return value is zer0 - TODO : implement queue and return free count after adding
+	if ( !active() ) {
+		if ( setPtr(addr) ) {
+			// START the sound on this address : on zero addr just return free count
+			nextData=0;	// This tracks the timing of the call to sayisr()
+			sayisr();	// Get first data now
+		}
+	}
+	else {
+		// Still active queue this addr when there is room
+		while ( (0==free) && active() );
+		say_add( addr );
+	}
+	return(free);	// return free count after adding
 }
 
 #define CHIRP_SIZE 41
@@ -244,7 +241,11 @@ static void sayisr() {
 	uint8_t energy;
 	Talkie *o = isrTalkptr;
 
-	if ( !(o->ptrAddr) ) return;
+	if ( !(o->ptrAddr) ) {
+		// Non Active :: try START the sound on say_remove() address
+		if ( o->setPtr(o->say_remove()) ) nextData=ISR_RATIO;	// This tracks the timing of the call to sayisr() :: Force nextData next timerInterrupt()
+		return;
+	}
 	energy = o->getBits(4);
 	uint8_t repeat;
 	// Read speech data, processing the variable size frames.
@@ -264,7 +265,11 @@ static void sayisr() {
 		synthK8 = 0;
 		synthK9 = 0;
 		synthK10 = 0;
-		o->setPtr(0);
+		
+		// Going Non Active :: try START the sound on say_remove() address
+		if ( o->setPtr(o->say_remove()) ) nextData=ISR_RATIO;	// This tracks the timing of the call to sayisr() :: Force nextData next timerInterrupt()
+		else	nextData=0;
+		
 	} else {
 		synthEnergy = tmsEnergy[energy];
 		repeat = o->getBits(1);
@@ -289,4 +294,18 @@ static void sayisr() {
 	}
 } 
 
+/*
+>> When sayQ brings new addr - if not .active() then start it { current code } return (free);
+	if ( active() && free ) :: then ADD it :: return (free);
+	else return (-1);
+	
+>> when timerInterrupt() completes :: if say_buffer_queued then start REMOVE
+	setPtr( say_remove );
 
+// RACE CONDITION :: sayQ : During Add - one active - none queued - on timerInterrupt() it completes  before item queued it won;t start next
+>> solution when sayisr() is entered if ptrAddris zero do a check for set_remove() in case one comes in un announced
+
+// Calling sayQ() will play or buffer and return free and if !free it will block like say() until room
+// Calling say() with queued sayQ() items will block until queued and the queue is empty
+
+*/

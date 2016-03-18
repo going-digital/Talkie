@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 // Talkie library
 // Copyright 2011 Peter Knight
 // This code is released under GPLv2 license.
@@ -24,13 +26,13 @@ const uint8_t spDINER[] PROGMEM = {0x0A, 0x28, 0xA5, 0x72, 0xE8, 0x29, 0x89, 0x6
 #define qBlink() (digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN) ))
 
 void setup() {
-  analogReference(INTERNAL);  // drop volume level
+  //analogReference(INTERNAL);  // drop volume level
   while (!Serial && 5000 > millis());
   Serial.println("\nSetting up");
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(5, OUTPUT);
   digitalWrite(5, 1);//Enable Amplified.
-  voice.sayQ(spDINER);
+  voice.say(spDINER);
 }
 void loop() {
   delay( 250 );
