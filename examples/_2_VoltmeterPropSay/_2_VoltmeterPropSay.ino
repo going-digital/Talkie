@@ -44,27 +44,27 @@ const uint8_t spVOLTS[]    PROGMEM = {0xA0, 0xDA, 0xA2, 0xB2, 0x3A, 0x44, 0x55, 
 
 /* Say any number between -999,999 and 999,999 */
 void sayNumber(long n) {
-  if (n<0) {
+  if (n < 0) {
     voice.say(spMINUS);
     sayNumber(-n);
-  } else if (n==0) {
+  } else if (n == 0) {
     voice.say(spZERO);
   } else {
-    if (n>=1000) {
+    if (n >= 1000) {
       int thousands = n / 1000;
       sayNumber(thousands);
       voice.say(spTHOUSAND);
       n %= 1000;
-      if ((n > 0) && (n<100)) voice.say(spAND);
+      if ((n > 0) && (n < 100)) voice.say(spAND);
     }
-    if (n>=100) {
+    if (n >= 100) {
       int hundreds = n / 100;
       sayNumber(hundreds);
       voice.say(spHUNDRED);
       n %= 100;
       if (n > 0) voice.say(spAND);
     }
-    if (n>19) {
+    if (n > 19) {
       int tens = n / 10;
       switch (tens) {
         case 2: voice.say(spTWENTY); break;
@@ -78,7 +78,7 @@ void sayNumber(long n) {
       }
       n %= 10;
     }
-    switch(n) {
+    switch (n) {
       case 1: voice.say(spONE); break;
       case 2: voice.say(spTWO); break;
       case 3: voice.say(spTHREE); break;
@@ -92,7 +92,7 @@ void sayNumber(long n) {
       case 11: voice.say(spELEVEN); break;
       case 12: voice.say(spTWELVE); break;
       case 13: voice.say(spTHIR_); voice.say(sp_TEEN); break;
-      case 14: voice.say(spFOUR); voice.say(sp_TEEN);break;
+      case 14: voice.say(spFOUR); voice.say(sp_TEEN); break;
       case 15: voice.say(spFIF_); voice.say(sp_TEEN); break;
       case 16: voice.say(spSIX); voice.say(sp_TEEN); break;
       case 17: voice.say(spSEVEN); voice.say(sp_TEEN); break;
@@ -107,7 +107,7 @@ void setup() {
   digitalWrite(5, 1);//Enable Amplified.
   while (!Serial && 5000 > millis());
   Serial.println("Setting up");
-  analogReference(INTERNAL);  // drop volume level
+  //analogReference(INTERNAL);  // drop volume level
 }
 void loop() {
   int voltage = analogRead(0) * 5.000 / 1.023;

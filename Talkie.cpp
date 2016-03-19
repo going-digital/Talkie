@@ -21,7 +21,7 @@ static int8_t synthK3,synthK4,synthK5,synthK6,synthK7,synthK8,synthK9,synthK10;
 static void sayisr();
 static Talkie *isrTalkptr;
 static uint8_t nextData=0;
-
+const uint8_t spStopSay[]    PROGMEM = { 0x0F};	// This is a special sound to cleanly: Silence the synthesiser
 
 
 
@@ -47,7 +47,7 @@ bool Talkie::setPtr(const uint8_t * addr) {
 bool Talkie::active() {
 	yield();
 	return( 0 != ptrAddr );
-}
+}	// active()
 
 // The ROMs used with the TI speech were serial, not byte wide.
 // Here's a handy routine to flip ROM data which is usually reversed.
@@ -81,8 +81,8 @@ uint8_t Talkie::getBits(uint8_t bits) {
 void Talkie::say(const uint8_t * addr) {
 	sayQ( addr );
 	while ( active() );
-}
-// ADD: addr
+}	// say()
+
 bool Talkie::say_add( const uint8_t *addr ) {
 	if ( addr && free ) {
 		free--;
@@ -91,9 +91,9 @@ bool Talkie::say_add( const uint8_t *addr ) {
 		return true;
 	}
 	return false;	// Do not add on ZERO addr or ZERO free queue
-}
+}	// say_add()
 
-// REMOVE: addr
+
 const uint8_t * Talkie::say_remove() {
 	const uint8_t *addr = 0;	// Return 0 on empty
 	if ( free < SAY_BUFFER_SIZE ) {
@@ -101,8 +101,11 @@ const uint8_t * Talkie::say_remove() {
 		addr = say_buffer[tail];
 		if (++tail >= SAY_BUFFER_SIZE) tail = 0;
 	}
+	else if ( ( ptrAddr ) && ( spStopSay != ptrAddr ) ) {
+		addr = spStopSay;
+	}
 	return addr;
-}
+}	// say_remove()
 
 int8_t Talkie::sayQ(const uint8_t * addr) {
 	if (!setup) {
@@ -146,20 +149,25 @@ int8_t Talkie::sayQ(const uint8_t * addr) {
 
 		setup = 1;
 	}
-	if ( !active() ) {
-		if ( setPtr(addr) ) {
-			// START the sound on this address : on zero addr just return free count
+	if ( 0 == addr  ) {	// Caller asked to have queue made empty and sound stopped
+		head = 0;
+		tail = 0;
+		free = SAY_BUFFER_SIZE;
+		setPtr(spStopSay);	// Force this NOP sound to play to turn off the output on next timerinterrupt()
+		nextData=ISR_RATIO;
+	}
+	else if ( !active() ) {
+		if ( setPtr(addr) ) {	// START the sound on this address : on zero addr just return free count
 			nextData=0;	// This tracks the timing of the call to sayisr()
 			sayisr();	// Get first data now
 		}
 	}
-	else {
-		// Still active queue this addr when there is room
+	else {	// Still active queue this addr when there is room
 		while ( (0==free) && active() );
 		say_add( addr );
 	}
 	return(free);	// return free count after adding
-}
+}	// sayQ()
 
 #define CHIRP_SIZE 41
 static uint8_t chirp[CHIRP_SIZE] = {0x00,0x2a,0xd4,0x32,0xb2,0x12,0x25,0x14,0x02,0xe1,0xc5,0x02,0x5f,0x5a,0x05,0x0f,0x26,0xfc,0xa5,0xa5,0xd6,0xdd,0xdc,0xfc,0x25,0x2b,0x22,0x21,0x0f,0xff,0xf8,0xee,0xed,0xef,0xf7,0xf6,0xfa,0x00,0x03,0x02,0x01};
@@ -172,6 +180,7 @@ static void timerInterrupt() {
 	static uint8_t nextPwm;
 	static uint8_t periodCounter;
 	static int16_t x0,x1,x2,x3,x4,x5,x6,x7,x8,x9;
+	Talkie *o = isrTalkptr;
 
 	int16_t u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10;
 
@@ -232,7 +241,8 @@ static void timerInterrupt() {
 	x0 = u0;
 
 	nextPwm = (u0>>2)+0x80;
-	nextData++;
+
+	if ( o->ptrAddr ) nextData++;	// if no sound don't run toward calling sayisr()
 	if (ISR_RATIO <= nextData) { nextData=0; sayisr(); }
 }
 
@@ -252,8 +262,7 @@ static void sayisr() {
 	if (energy == 0) {
 		// Energy = 0: rest frame
 		synthEnergy = 0;
-	} else if (energy == 0xf) {
-		// Energy = 15: stop frame. Silence the synthesiser.
+	} else if (energy == 0xf) {	// Energy = 15: stop frame. Silence the synthesiser.
 		synthEnergy = 0;
 		synthK1 = 0;
 		synthK2 = 0;
@@ -266,7 +275,7 @@ static void sayisr() {
 		synthK9 = 0;
 		synthK10 = 0;
 		
-		// Going Non Active :: try START the sound on say_remove() address
+		// Going Non Active :: START the sound on say_remove() address
 		if ( o->setPtr(o->say_remove()) ) nextData=ISR_RATIO;	// This tracks the timing of the call to sayisr() :: Force nextData next timerInterrupt()
 		else	nextData=0;
 		
@@ -292,12 +301,12 @@ static void sayisr() {
 			}
 		}
 	}
-} 
+} // sayisr()
 
 /*
->> When sayQ brings new addr - if not .active() then start it { current code } return (free);
+>> When sayQ brings new addr - if not .active() then start it { 'current code' } return (free);
 	if ( active() && free ) :: then ADD it :: return (free);
-	else return (-1);
+	else do a say() type while block until it can be added, then return
 	
 >> when timerInterrupt() completes :: if say_buffer_queued then start REMOVE
 	setPtr( say_remove );

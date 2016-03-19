@@ -119,4 +119,5 @@ void loop() {
   sayQNumber(voltage);
   voice.sayQ(spMILLI);
   voice.say(spVOLTS); // DOING .say() here forces all sayQ() items to be dequeued and the sketch blocks - this keeps the display in sync
+  // voice.sayQ(spVOLTS); // DOING .say() here forces all sayQ() items to be dequeued and the sketch blocks - this keeps the display in sync
 }

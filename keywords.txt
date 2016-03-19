@@ -1,5 +1,5 @@
 Talkie	KEYWORD1
-say	KEYWORD2
+say		KEYWORD2
 sayQ	KEYWORD2
 active	KEYWORD2
 ptrAddr	KEYWORD2

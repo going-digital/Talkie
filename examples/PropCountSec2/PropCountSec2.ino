@@ -50,7 +50,7 @@ const uint8_t spMORNING[]   PROGMEM = {0xCE, 0x08, 0x52, 0x2A, 0x35, 0x5D, 0x39,
 const uint8_t spPAUSE1[]    PROGMEM = {0x00, 0x00, 0x00, 0x00, 0xFF, 0x0F};
 
 const uint8_t *spSpeak[] = { spOH, spONE, spTWO, spTHREE, spFOUR, spFIVE, spSIX, spSEVEN, spEIGHT, spNINE, spFOURTY, spFIFTY };
-#define SP_MAX (sizeof( spSpeak ) / sizeof( uint8_t*))
+const uint8_t SP_MAX (sizeof( spSpeak ) / sizeof( uint8_t*));
 uint8_t iidx = 0;
 
 void setup() {
@@ -62,7 +62,7 @@ void setup() {
   for ( int jj = 0; jj < 3; jj++ )
     for ( int ii = 0; ii < SP_MAX; ii++ )
       Serial.println( voice.sayQ(spSpeak[ii]) );
-  voice.say(spPAUSE1);
+  voice.say(spPAUSE1);  // say() causes BLOCKING behavior to clear the queue
   voice.say(spMORNING);
 }
 
@@ -70,7 +70,7 @@ uint8_t lastKM = 11;
 uint32_t  busyloops = 0;
 void loop() {
   uint8_t currKM = (millis() / 1000) % 10;  // Get the running SECONDS digits from the millis() count
-  //  if ( !voice.active() && lastKM != currKM ) {
+  //  if ( !voice.active() && lastKM != currKM ) {  // Testing .active prevents adding extra sounds while .active
   if ( lastKM != currKM ) {
     Serial.print("busyloops  ");
     Serial.println(busyloops);
