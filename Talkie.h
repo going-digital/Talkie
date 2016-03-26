@@ -16,7 +16,7 @@ public:
 	int8_t sayQ(const uint8_t * address);
 	const uint8_t * ptrAddr;
 	uint8_t ptrBit;
-	bool active( void );
+	uint8_t active( void );
 	uint8_t getBits(uint8_t bits);
 	bool setPtr(const uint8_t * addr);
 	bool say_add( const uint8_t *addr );	// sayisr() calls this

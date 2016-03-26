@@ -44,9 +44,10 @@ bool Talkie::setPtr(const uint8_t * addr) {
 	if ( addr ) return(true);
 	else return(false);
 }
-bool Talkie::active() {
+uint8_t Talkie::active() {
 	yield();
-	return( 0 != ptrAddr );
+	if ( 0 == ptrAddr ) return 0;	// Nothing playing!
+	else return( 1 + (SAY_BUFFER_SIZE - free) );	// 1 active plus X in queue
 }	// active()
 
 // The ROMs used with the TI speech were serial, not byte wide.
