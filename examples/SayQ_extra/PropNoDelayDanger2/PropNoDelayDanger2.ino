@@ -46,7 +46,7 @@ void loop() {
       if ( iidx % 2 )
         voice.sayQ(spSpeak[iidx]);
       else
-        voice.sayQ(spSpeak[iidx]);
+        voice.say(spSpeak[iidx]);
       Serial.print(">>");
       Serial.print("busyloops  ");
       Serial.println(busyloops);
