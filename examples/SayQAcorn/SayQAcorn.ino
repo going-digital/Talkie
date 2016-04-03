@@ -40,7 +40,7 @@ const uint8_t * indexArray [] {spTHIS, spIS, spNO, spNEGATIVE, spPARAMETER, spPR
 
 Talkie voice;
 
-#define qBlink() {GPIOC_PTOR=32;}	// This toggles the Teensy 3.2 Builtin LED pin 13
+#define qBlink() (digitalWriteFast(LED_BUILTIN, !digitalReadFast(LED_BUILTIN) ))  // This toggles the Teensy 3.2 Builtin LED pin 13
 void setup() {
   while (!Serial && 5000 > millis());
   Serial.println("\nSetting up");
