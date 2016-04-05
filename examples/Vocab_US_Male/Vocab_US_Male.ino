@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 // Talkie library
 // Copyright 2011 Peter Knight
 // This code is released under GPLv2 license.
