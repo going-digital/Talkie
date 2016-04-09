@@ -49,17 +49,20 @@ const uint8_t spMORNING[]   PROGMEM = {0xCE,0x08,0x52,0x2A,0x35,0x5D,0x39,0x53,0
 const uint8_t spPAUSE1[]    PROGMEM = {0x00,0x00,0x00,0x00,0xFF,0x0F};
 
 void setup() {
-	voice.say(spGOOD);
-	voice.say(spMORNING);
-	voice.say(spPAUSE1);
-	voice.say(spTHE);
-	voice.say(spTIME);
-	voice.say(spIS);
-	voice.say(spELEVEN);
-	voice.say(spTHIRTY);
-	voice.say(spSIX);
-	voice.say(spA_M_);
-	voice.say(spPAUSE1);
+  pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);//Enable Amplified PROP shield
+  delay(10);
+  voice.say(spGOOD);
+  voice.say(spMORNING);
+  voice.say(spPAUSE1);
+  voice.say(spTHE);
+  voice.say(spTIME);
+  voice.say(spIS);
+  voice.say(spELEVEN);
+  voice.say(spTHIRTY);
+  voice.say(spSIX);
+  voice.say(spA_M_);
+  voice.say(spPAUSE1);
 }
 void loop() {
 }

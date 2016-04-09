@@ -102,6 +102,9 @@ void sayNumber(long n) {
   }
 }
 void setup() {
+  pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);//Enable Amplified PROP shield
+  delay(10);
   Serial.begin(9600);
 }
 void loop() {

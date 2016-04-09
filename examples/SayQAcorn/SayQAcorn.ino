@@ -47,7 +47,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   qBlink();
   pinMode(5, OUTPUT);
-  digitalWrite(5, 1);//Enable Amplified PROP shield
+  digitalWrite(5, HIGH);//Enable Amplified PROP shield
+  delay(10);
   voice.say( spACORN ); // This orignal function when used blocks until all queued sounds have played
 }
 
