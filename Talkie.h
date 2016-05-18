@@ -24,9 +24,9 @@ public:
 private:
 	// Say queue
 	const uint8_t *  say_buffer[SAY_BUFFER_SIZE];
-	byte head; // init on setup = 0
-	byte tail; // init on setup = 0
-	byte free; // init on setup = SAY_BUFFER_SIZE
+	uint8_t head; // init on setup = 0
+	uint8_t tail; // init on setup = 0
+	uint8_t free; // init on setup = SAY_BUFFER_SIZE
 	
 	// Setup
 	uint8_t setup;
