@@ -191,8 +191,12 @@ static void timerInterrupt() {
 #elif defined(__arm__) && defined(CORE_TEENSY)
 #if defined(__MKL26Z64__)
 	analogWrite(A12, nextPwm);
-#else
+#elif defined(__MK20DX128__) || defined(__MK20DX256__)
 	analogWrite(A14, nextPwm);
+#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
+	analogWrite(A21, nextPwm);
+#else 
+	#error "Unknown Teensy"	
 #endif
 #endif
 	if (synthPeriod) {
