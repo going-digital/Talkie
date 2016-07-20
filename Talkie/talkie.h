@@ -12,7 +12,7 @@
 class Talkie
 {
 	public:
-		void say(uint8_t* address);
+		void say(const uint8_t* address);
 		uint8_t* ptrAddr;
 		uint8_t ptrBit;
 	private:
@@ -20,7 +20,7 @@ class Talkie
 		uint8_t setup;
 		
 		// Bitstream parser
-		void setPtr(uint8_t* addr);
+		void setPtr(const uint8_t* addr);
 		uint8_t rev(uint8_t a);
 		uint8_t getBits(uint8_t bits);
 };
