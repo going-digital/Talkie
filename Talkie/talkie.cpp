@@ -30,8 +30,8 @@ int8_t tmsK8[0x08]      = {0xC0,0xD8,0xF0,0x07,0x1F,0x37,0x4F,0x66};
 int8_t tmsK9[0x08]      = {0xC0,0xD4,0xE8,0xFC,0x10,0x25,0x39,0x4D};
 int8_t tmsK10[0x08]     = {0xCD,0xDF,0xF1,0x04,0x16,0x20,0x3B,0x4D};
 
-void Talkie::setPtr(uint8_t* addr) {
-	ptrAddr = addr;
+void Talkie::setPtr(const uint8_t* addr) {
+	ptrAddr = (uint8_t*)addr;
 	ptrBit = 0;
 }
 
@@ -63,7 +63,7 @@ uint8_t Talkie::getBits(uint8_t bits) {
 	}
 	return value;
 }
-void Talkie::say(uint8_t* addr) {
+void Talkie::say(const uint8_t* addr) {
 	uint8_t energy;
 
 	if (!setup) {
