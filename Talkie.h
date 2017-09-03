@@ -7,6 +7,10 @@
 
 #include <inttypes.h>
 
+#if defined(__AVR__) && !defined(TCCR2A)
+#error "Sorry, when using an AVR chip, Talkie requires Timer2.  This board doesn't have it."
+#endif
+
 #define SAY_BUFFER_SIZE     24	// 24 sets of 4 bytes plus added queue indexes is about 100 added bytes.
 
 class Talkie
