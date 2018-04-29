@@ -5,7 +5,7 @@ Speech library for Arduino
 
 Quick start
 -----------
-[Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/zipball/master) Install the "Talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
+[Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/Talkie/zipball/master) Install the "Talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
 
 Note that currently, Talkie only works on 168 or 328 based Arduinos at 16MHz. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
@@ -26,7 +26,6 @@ Talkie comes with over 1000 words of speech data that can be included in your pr
 How to use the library
 ----------------------
 See the examples. Any commented data lines in the examples can be un-commented and used. Note that some speech libraries come with word endings such as '-S', '-Z', '-TEEN' that can be used to increase vocabulary.
-
 
 Word dictionaries
 -----------------
@@ -55,6 +54,7 @@ The Audio output
 Talkie sets up a special very high speed PWM, so audio can be taken directly from pin 3 with no other filtering.
 
 Note that Talkie uses Timers 1 and 2 for this purpose, which may conflict with PWM outputs or other libraries.
+
 
 Future plans
 ------------
