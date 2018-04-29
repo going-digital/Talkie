@@ -1,0 +1,4 @@
+Talkie	KEYWORD1
+say	KEYWORD2
+ptrAddr	KEYWORD3
+ptrBit	KEYWORD3

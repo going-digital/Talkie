@@ -5,9 +5,9 @@ Speech library for Arduino
 
 Quick start
 -----------
-[Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/Talkie/zipball/master) Install the "talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
+[Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/Talkie/zipball/master) Install the "Talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
 
-Note that currently, Talkie only on 168 or 328 based Arduinos at 16MHz only. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
+Note that currently, Talkie only works on 168 or 328 based Arduinos at 16MHz. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
 
 Introduction
@@ -37,7 +37,14 @@ Word dictionaries
 
 * Vocab_US_Male - a male US english voice. 206 words related to aeronautics. 16K bytes in total. Data of unknown origin. ROM serial number VM61002.
 
-* Vocab_US_Male_Large - a male US english voice. 402 words related to aeronautics. 48K bytes speech data. Data of unknown origin. ROM serial number VM61003/4/5.
+* Vocab_US_Large - a male US english voice. 402 words related to aeronautics. 48K bytes speech data. Data of unknown origin. ROM serial number VM61003/4/5.
+
+
+Demos
+-----
+* _1_Getting_Started - simple demo using some words from Vocab_US_Male
+
+* _2_Voltmeter - a more complete demo using numbers and words from Vocab_US_Male to make a talking voltmeter
 
 * Demo_Toms_Diner - demo of the work-in-progress Talkie compressor. 24K bytes music data. Tom's Diner was written/recorded by Suzanne Vega [(Amazon UK)](http://www.amazon.co.uk/Solitude-Standing-Suzanne-Vega/dp/B000026GZQ) [(Amazon US)](http://www.amazon.com/Solitude-Standing-Suzanne-Vega/dp/B000002GHB) or look for 'Solitude Standing' on your preferred music store. (Only this album contains the original a capella version)
 
@@ -57,7 +64,7 @@ Future plans
 
 Important facts
 ---------------
-* LPC currently outputs speech sounds on digital pin 3 only. This is currently hard-wired within the library.
+* LPC currently outputs speech sounds on digital pin 3 only. This is hard-wired within the library.
 * Tivoice uses Timer 1 and Timer 2, which can break analogWrite(), and some other libraries.
 
 
