@@ -5,9 +5,9 @@ Speech library for Arduino
 
 Quick start
 -----------
-[Download the .zip file from the link at the top of the page or click here.](https://github.com/GaryA/Talkie/zipball/master) Install the "Talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
+[Download the .zip file from the link at the top of the page or click here.](https://github.com//Talkgoing-digitalie/zipball/master) Install the "Talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
 
-Note that currently, Talkie only works on 168 or 328 based Arduinos at 16MHz only. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
+Note that currently, Talkie only works on 168 or 328 based Arduinos at 16MHz. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
 
 Introduction
@@ -25,10 +25,7 @@ Talkie comes with over 1000 words of speech data that can be included in your pr
 
 How to use the library
 ----------------------
-See the examples. Any commented (`//`) data lines in the examples can be un-commented and used.
-Note that some speech libraries come with word endings such as '-S', '-Z', '-TEEN' that can be used to increase vocabulary.
-
-Open any of the Vocab_* examples and copy & paste any of the word/sound definition lines (starting `const uint8_t`) into your sketch. Remove comment `//` from the beginning of any lines that have them.
+See the examples. Any commented data lines in the examples can be un-commented and used. Note that some speech libraries come with word endings such as '-S', '-Z', '-TEEN' that can be used to increase vocabulary.
 
 
 Word dictionaries
@@ -59,17 +56,20 @@ Talkie sets up a special very high speed PWM, so audio can be taken directly fro
 
 Note that Talkie uses Timers 1 and 2 for this purpose, which may conflict with PWM outputs or other libraries.
 
+Future plans
+------------
+1. I'm working on an encoder for generating your own recordings (See demo). Its not producing results of the quality I would like, but things are improving. For now Qboxpro, an unsupported old Windows application, can produce Talkie compatible data streams.
+2. Improve compatibility with other Arduinos and AVR devices
+3. Implement rule based infinite vocabulary synthesis from Computer Concepts Speech ROM and Texas Instruments Terminal Emulator 2.
 
 Important facts
 ---------------
-* Talkie currently outputs speech sounds on digital pin 3 only. This is hard-wired within the library.
-* Talkie uses Timer 1 and Timer 2, which can break analogWrite(), and some other libraries.
+* LPC currently outputs speech sounds on digital pin 3 only. This is hard-wired within the library.
+* Tivoice uses Timer 1 and Timer 2, which can break analogWrite(), and some other libraries.
 
 
 Thanks
 ------
-* For the original Talkie library: [Peter Knight](https://github.com/going-digital/Talkie)
-And Peter's original list of thanks:
 * For motivation and encouragement: Linx Electronics Club, esp. Rob, Shaw, Steve
 * Thanks to the original Texas Instruments speech group: Larry Brantingham, Paul Breedlove, Richard Wiggins and Gene Frantz
 * Thanks to the emulator-heads for their extensive documentation and coefficient tables: Lord Nightmare, Kevtris and all [MAME](http://mamedev.org) and [MESS](http://www.mess.org) contributors
