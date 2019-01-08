@@ -23,7 +23,9 @@ static Talkie *isrTalkptr;
 static uint8_t nextData=0;
 const uint8_t spStopSay[]    PROGMEM = { 0x0F};	// This is a special sound to cleanly: Silence the synthesiser
 
-
+//Setup config for teensy
+uint8_t _pwmPIN;
+bool _hasPShield;
 
 static const uint8_t tmsEnergy[0x10] = {0x00,0x02,0x03,0x04,0x05,0x07,0x0a,0x0f,0x14,0x20,0x29,0x39,0x51,0x72,0xa1,0xff};
 static const uint8_t tmsPeriod[0x40] = {0x00,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2A,0x2B,0x2D,0x2F,0x31,0x33,0x35,0x36,0x39,0x3B,0x3D,0x3F,0x42,0x45,0x47,0x49,0x4D,0x4F,0x51,0x55,0x57,0x5C,0x5F,0x63,0x66,0x6A,0x6E,0x73,0x77,0x7B,0x80,0x85,0x8A,0x8F,0x95,0x9A,0xA0};
@@ -37,6 +39,13 @@ static const uint8_t tmsK7[0x10]      = {0xB3,0xBF,0xCB,0xD7,0xE3,0xEF,0xFB,0x07
 static const uint8_t tmsK8[0x08]      = {0xC0,0xD8,0xF0,0x07,0x1F,0x37,0x4F,0x66};
 static const uint8_t tmsK9[0x08]      = {0xC0,0xD4,0xE8,0xFC,0x10,0x25,0x39,0x4D};
 static const uint8_t tmsK10[0x08]     = {0xCD,0xDF,0xF1,0x04,0x16,0x20,0x3B,0x4D};
+
+
+void Talkie::begin(uint8_t pinPWM, bool propshield){
+	_pwmPIN = pinPWM;
+	_hasPShield = propshield;
+}
+
 
 bool Talkie::setPtr(const uint8_t * addr) {
 	ptrAddr = addr;
@@ -117,7 +126,7 @@ int8_t Talkie::sayQ(const uint8_t * addr) {
 #if F_CPU != 16000000L
 #error "F_CPU must be 16 MHz"
 #endif
-		pinMode(3,OUTPUT);
+		pinMode(_pwmPIN,OUTPUT);
 		// Timer 2 set up as a 62500Hz PWM.
 		//
 		// The PWM 'buzz' is well above human hearing range and is
@@ -141,6 +150,9 @@ int8_t Talkie::sayQ(const uint8_t * addr) {
 #define ISR(f) void f(void)
 		IntervalTimer *t = new IntervalTimer();
 		t->begin(timerInterrupt, 1000000.0f / (float)FS);
+		#if defined(__IMXRT1052__) || defined(__IMXRT1060__)
+			analogWriteFrequency(_pwmPIN,62500);
+		#endif
 #define ISR_RATIO (25000/ (1000000.0f / (float)FS) )
 #endif
 		isrTalkptr = this;
@@ -189,15 +201,24 @@ static void timerInterrupt() {
 	OCR2B = nextPwm;
 	sei();
 #elif defined(__arm__) && defined(CORE_TEENSY)
-#if defined(__MKL26Z64__)
-	analogWrite(A12, nextPwm);
-#elif defined(__MK20DX128__) || defined(__MK20DX256__)
-	analogWrite(A14, nextPwm);
-#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
-	analogWrite(A21, nextPwm);
-#else 
-	#error "Unknown Teensy"	
-#endif
+	if(_hasPShield) {
+		#if defined(__MKL26Z64__)
+			analogWrite(A12, nextPwm);
+		#elif defined(__MK20DX128__) || defined(__MK20DX256__)
+			analogWrite(A14, nextPwm);
+		#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
+			analogWrite(A21, nextPwm);
+		#else
+		//#error "No Propshield"	// dont like this line
+		#endif
+	} else {
+		#if defined(__IMXRT1052__) || defined(__IMXRT1060__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) \
+			|| defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MKL26Z64__)
+			analogWrite(_pwmPIN, nextPwm);
+		#else 
+		#error "Unknown Teensy"	
+		#endif
+	}
 #endif
 	if (synthPeriod) {
 		// Voiced source
