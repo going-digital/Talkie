@@ -211,7 +211,7 @@ static void timerInterrupt() {
 			analogWrite(A14, nextPwm);
 		#elif defined(__MK64FX512__) || defined(__MK66FX1M0__)
 			analogWrite(A21, nextPwm);
-		#elif defined(__IMXRT1052__) || defined(__IMXRT1060__)
+		#elif defined(__IMXRT1052__) || defined(__IMXRT1062__)
 		Serial.println("Board does not support Propshield");
 		exit(0);
 		#else
@@ -220,7 +220,7 @@ static void timerInterrupt() {
 		pinMode(5, OUTPUT);
 		digitalWrite(5, HIGH);//Enable Amplified PROP shield
 	} else {
-		#if defined(__IMXRT1052__) || defined(__IMXRT1060__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) \
+		#if defined(__IMXRT1052__) || defined(__IMXRT1062__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) \
 			|| defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MKL26Z64__)
 			analogWrite(_pwmPIN, nextPwm);
 		#else 
