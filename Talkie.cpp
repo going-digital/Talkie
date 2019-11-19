@@ -41,13 +41,13 @@ static const uint8_t tmsK9[0x08]      = {0xC0,0xD4,0xE8,0xFC,0x10,0x25,0x39,0x4D
 static const uint8_t tmsK10[0x08]     = {0xCD,0xDF,0xF1,0x04,0x16,0x20,0x3B,0x4D};
 
 
-void Talkie::beginPWM(uint8_t pinPWM){
-	_pwmPIN = pinPWM;
-	_hasPShield = false;
-}
-
-void Talkie::beginPropShield(){
-	_hasPShield = true;
+void Talkie::begin(uint8_t pinPWM){
+	if(pinPWM == 255){
+		_hasPShield = true;
+	} else {         
+		_pwmPIN = pinPWM;
+		_hasPShield = false;
+	}
 }
 
 bool Talkie::setPtr(const uint8_t * addr) {
@@ -217,8 +217,6 @@ static void timerInterrupt() {
 		#else
 		#error "Unknown Teensy"	// dont like this line
 		#endif
-		pinMode(5, OUTPUT);
-		digitalWrite(5, HIGH);//Enable Amplified PROP shield
 	} else {
 		#if defined(__IMXRT1052__) || defined(__IMXRT1062__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) \
 			|| defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MKL26Z64__)

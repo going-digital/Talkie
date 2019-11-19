@@ -18,8 +18,7 @@
 class Talkie
 {
 public:
-	void beginPWM(uint8_t pinPWM);
-	void beginPropShield();
+	void beginPWM(uint8_t pinPWM = 255);
 	void say(const uint8_t * address);
 	int8_t sayQ(const uint8_t * address);
 	const uint8_t * ptrAddr;
