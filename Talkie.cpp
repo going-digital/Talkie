@@ -24,7 +24,7 @@ static uint8_t nextData=0;
 const uint8_t spStopSay[]    PROGMEM = { 0x0F};	// This is a special sound to cleanly: Silence the synthesiser
 
 //Setup config for teensy
-uint8_t _pwmPIN = A0;
+uint8_t _pwmPIN = 5;
 bool _hasPShield = true;
 
 static const uint8_t tmsEnergy[0x10] = {0x00,0x02,0x03,0x04,0x05,0x07,0x0a,0x0f,0x14,0x20,0x29,0x39,0x51,0x72,0xa1,0xff};
