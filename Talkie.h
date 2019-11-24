@@ -18,8 +18,7 @@
 class Talkie
 {
 public:
-	void beginPWM(uint8_t pinPWM);
-	void beginPropShield();
+	void begin(uint8_t pinPWM = 255);
 	void say(const uint8_t * address);
 	int8_t sayQ(const uint8_t * address);
 	const uint8_t * ptrAddr;
@@ -29,7 +28,13 @@ public:
 	bool setPtr(const uint8_t * addr);
 	bool say_add( const uint8_t *addr );	// sayisr() calls this
 	const uint8_t * say_remove();	// sayisr() calls this
-	
+
+	// inline function beginPWM(pinNo) is being kept only for backwards
+	//compatibility with existing programs. It is simpler to use begin()
+	//which will default to pin A0
+	inline void beginPWM(uint8_t pinPWM){
+		begin(pinPWM);
+	}
 private:
 	// Say queue
 	const uint8_t *  say_buffer[SAY_BUFFER_SIZE];

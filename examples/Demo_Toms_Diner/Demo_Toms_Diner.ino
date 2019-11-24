@@ -25,8 +25,10 @@ const uint8_t spDINER[] PROGMEM = {0x0A,0x28,0xA5,0x72,0xE8,0x29,0x89,0x6B,0xB0,
 
 void setup() {
   
-  //voice.beginPWM(9);      // specify PWM pin to be used
-  voice.beginPropShield();  // use if a propshield is attached using for talkie
+  //voice.begin(9);      // specify PWM pin to be used
+  voice.begin();  		// use if a propshield is attached using for talkie
+  pinMode(5, OUTPUT);	//Enable Amplified PROP shield
+  digitalWrite(5, HIGH);
   delay(10);
   voice.say(spDINER);
 }
