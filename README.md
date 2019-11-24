@@ -5,9 +5,11 @@ Speech library for Arduino
 
 Quick start
 -----------
-[Download the .zip file from the link at the top of the page or click here.](https://github.com/going-digital/Talkie/zipball/master) Install the "talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo). Connect headphones or an audio amplifier to digital pin 3.
+[Download the .zip file from the link at the top of the page or click here.](https://github.com/PaulStoffregen/Talkie/zipball/master) Install the "talkie" directory in your Arduino / libraries directory. Restart the Arduino software, and pick one of the examples from the Talkie section. Program it onto a 168 or 328 based Arduino (Uno, Duemilanove or Diecimila - not a Mega or Leonardo).
 
-Note that currently, Talkie only on 168 or 328 based Arduinos at 16MHz only. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
+Connect headphones or an audio amplifier to digital pin 3 on Arduino, the DAC pin on Teensy 3.x or PWM pin 5 (default) on Teensy 4.x.
+
+Note that currently, Talkie works only on 168 or 328 based Arduinos at 16MHz, and Teensy LC, 3.1 & 3.2. A reduced-CPU version for 8MHz devices with reduced speech quality is included in the [Solder Time 2 talkie project.](https://github.com/going-digital/st2_talkie)
 
 
 Introduction
@@ -44,9 +46,15 @@ Word dictionaries
 
 The Audio output
 ----------------
-Talkie sets up a special very high speed PWM, so audio can be taken directly from pin 3 with no other filtering.
+Talkie sets up a special very high speed PWM, so audio can be taken directly from pin 3 with no other filtering.  On Teensy 3.x, a true analog output DAC is used.
 
-Note that Talkie uses Timers 1 and 2 for this purpose, which may conflict with PWM outputs or other libraries.
+Note that Talkie uses Timers 1 and 2 for PWM & timing, which may conflict with PWM outputs or other libraries.  On Teensy, one of the available IntervalTimers is used.
+
+In addition to using the DAC pin for the T3.x any PWM pin can be used as well by specifing the PWM pin in the ```begin```, e.g.,
+
+```voice.begin(pwmPin#);```
+
+This is important when using the Talkie library with the T4.x since there is no DAC on the T4.x.  So you must specify a PWM pin.
 
 
 Future plans
